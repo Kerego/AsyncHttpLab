@@ -40,9 +40,8 @@ namespace AsyncHttpLab
 	/// </summary>
 	public sealed partial class MainPage : Page
 	{
-		ObservableCollection<SongContainer> Songs = new ObservableCollection<SongContainer>();
-		Queue<DownloadItem> DownloadQueue = new Queue<DownloadItem>();
-		List<byte> response = new List<byte>();
+		ObservableCollection<SongContainer> _songs = new ObservableCollection<SongContainer>();
+		Queue<DownloadItem> _downloadQueue = new Queue<DownloadItem>();
 		ToastNotifier _toastNotifier;
 		const string _mp3Host = "cdndl.zaycev.net";
 		const string _searchHost = "zaycev.net";
@@ -56,7 +55,7 @@ namespace AsyncHttpLab
 
 		private async Task DownloadCompleted(byte[] response, ContentType type)
 		{
-			var downloadItem = DownloadQueue.Dequeue();
+			var downloadItem = _downloadQueue.Dequeue();
 
 			if (type == ContentType.mp3)
 				await SaveMp3(response, downloadItem.Name);
@@ -66,11 +65,11 @@ namespace AsyncHttpLab
 			if(downloadItem.CompletedAction != null)
 				downloadItem.CompletedAction();
 
-			if (!DownloadQueue.Any())
+			if (!_downloadQueue.Any())
 				await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => Progress.Visibility = Visibility.Collapsed);
 			else
 			{
-				var next = DownloadQueue.Peek();
+				var next = _downloadQueue.Peek();
 				Downloader.Download(type == ContentType.mp3 ? _mp3Host : _searchHost, next.Path, next.ContentType);
 			}
 		}
@@ -80,8 +79,8 @@ namespace AsyncHttpLab
 		{
 			var path = "/search.html?query_search=" + MusicInput.Text.Replace(' ', '+');
 			var downloadItem = new DownloadItem() { ContentType = ContentType.html, Name = "search.html", Path = path };
-			DownloadQueue.Enqueue(downloadItem);
-			if (DownloadQueue.Count > 1)
+			_downloadQueue.Enqueue(downloadItem);
+			if (_downloadQueue.Count > 1)
 				return;
 			Downloader.Download("zaycev.net", path, ContentType.html);
 			Progress.Visibility = Visibility.Visible;
@@ -92,12 +91,12 @@ namespace AsyncHttpLab
 			var button = sender as Button;
 			var song = (button.DataContext as SongContainer);
 			button.IsEnabled = false;
-			Action completedAction = async () => await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => button.IsEnabled = true);
 
+			Action completedAction = async () => await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => button.IsEnabled = true);
 			var downloadItem = new DownloadItem() { Name = song.FullName, ContentType = ContentType.mp3, Path = song.Link, CompletedAction = completedAction };
 
-			DownloadQueue.Enqueue(downloadItem);
-			if (DownloadQueue.Count > 1)
+			_downloadQueue.Enqueue(downloadItem);
+			if (_downloadQueue.Count > 1)
 				return;
 			Downloader.Download("cdndl.zaycev.net", song.Link, ContentType.mp3);
 			Progress.Visibility = Visibility.Visible;
@@ -111,7 +110,7 @@ namespace AsyncHttpLab
 				if (bytes == null)
 					return;
 
-				Songs.Clear();
+				_songs.Clear();
 				var html = Encoding.UTF8.GetString(bytes);
 
 				ResourceLoader loader = new ResourceLoader("Regexs");
@@ -124,7 +123,7 @@ namespace AsyncHttpLab
 					var mp3 = link.IndexOf(".mp3");
 					var downloadLink = link.Insert(mp3, ("/" + match.Groups[2].Value + "_-_" + match.Groups[3].Value).ToLower().Replace(' ', '_').Replace('\'', '_'));
 					var container = new SongContainer() { Name = match.Groups[3].Value, Artist = match.Groups[2].Value, Link = downloadLink };
-					Songs.Add(container);
+					_songs.Add(container);
 				}
 			});
 		}

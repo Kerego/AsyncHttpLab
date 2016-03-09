@@ -27,7 +27,7 @@
 			<ProgressBar x:Name="Progress" IsIndeterminate="True" Visibility="Collapsed"/>
 		</StackPanel>
 		<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-			<ItemsControl ItemsSource="{x:Bind Songs}">
+			<ItemsControl ItemsSource="{x:Bind _songs}">
 				<ItemsControl.ItemTemplate>
 					<DataTemplate x:DataType="models:SongContainer">
 						<Grid HorizontalAlignment="Stretch" Margin="15" Height="60" Background="{ThemeResource SystemAccentColor}" >
