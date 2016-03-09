@@ -26,6 +26,13 @@
 			</Grid>
 			<ProgressBar x:Name="Progress" IsIndeterminate="True" Visibility="Collapsed"/>
 		</StackPanel>
+		<TextBlock x:Name="SongsSearchState" 
+				   HorizontalAlignment="Center" 
+				   VerticalAlignment="Center" 
+				   Grid.Row="1" 
+				   Visibility="Collapsed"
+				   FontSize="33"
+				   Text="The song could not be found"></TextBlock>
 		<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
 			<ItemsControl ItemsSource="{x:Bind _songs}">
 				<ItemsControl.ItemTemplate>

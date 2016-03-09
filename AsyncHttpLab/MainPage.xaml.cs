@@ -108,7 +108,9 @@ namespace AsyncHttpLab
 			await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
 			{
 				if (bytes == null)
+				{
 					return;
+				}
 
 				_songs.Clear();
 				var html = Encoding.UTF8.GetString(bytes);
@@ -116,7 +118,10 @@ namespace AsyncHttpLab
 				ResourceLoader loader = new ResourceLoader("Regexs");
 				var pattern = loader.GetString("zaycevRegex");
 				var matches = Regex.Matches(html, pattern, RegexOptions.Singleline);
-
+				if (matches.Count > 0)
+					SongsSearchState.Visibility = Visibility.Collapsed;
+				else
+					SongsSearchState.Visibility = Visibility.Visible;
 				foreach (Match match in matches)
 				{
 					var link = match.Groups[1].Value;
