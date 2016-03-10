@@ -115,19 +115,22 @@ namespace AsyncHttpLab
 				_songs.Clear();
 				var html = Encoding.UTF8.GetString(bytes);
 
-				ResourceLoader loader = new ResourceLoader("Regexs");
-				var pattern = loader.GetString("zaycevRegex");
+				ResourceLoader loader = new ResourceLoader("Regexs"); 
+				var pattern = loader.GetString("zaycevRegex"); //load regex from resources
 				var matches = Regex.Matches(html, pattern, RegexOptions.Singleline);
 				if (matches.Count > 0)
 					SongsSearchState.Visibility = Visibility.Collapsed;
 				else
 					SongsSearchState.Visibility = Visibility.Visible;
+				//create a container for each song found
 				foreach (Match match in matches)
 				{
 					var link = match.Groups[1].Value;
 					var mp3 = link.IndexOf(".mp3");
-					var downloadLink = link.Insert(mp3, ("/" + match.Groups[2].Value + "_-_" + match.Groups[3].Value).ToLower().Replace(' ', '_').Replace('\'', '_'));
-					var container = new SongContainer() { Name = match.Groups[3].Value, Artist = match.Groups[2].Value, Link = downloadLink };
+					var name = match.Groups[3].Value;
+					var artist = match.Groups[2].Value;
+					var downloadLink = link.Insert(mp3, ("/" + artist + "_-_" + name).ToLower().Replace(' ', '_').Replace('\'', '_'));
+					var container = new SongContainer() { Name = name, Artist = artist, Link = downloadLink };
 					_songs.Add(container);
 				}
 			});
